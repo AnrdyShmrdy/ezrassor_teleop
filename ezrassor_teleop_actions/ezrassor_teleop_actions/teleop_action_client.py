@@ -93,7 +93,7 @@ class TeleopActionClient:
 
             if len(action_components) != 2:
                 #rospy.logerr -->  self.teleop_node.get_logger().error(
-                rclpy.Node.get_logger().error(
+                self.teleop_node.get_logger().error(
                     "Incorrect number of instructions given. Expected 2 got %s\n%s",
                     len(action_components),
                     action,
@@ -105,7 +105,7 @@ class TeleopActionClient:
 
             if op not in valid_operations:
                 #rospy.logerr -->  self.teleop_node.get_logger().error(
-                rclpy.Node.get_logger().error("Invalid operation received: %s", action)
+                self.teleop_node.get_logger().error('Invalid operation received: {0}'.format(action))
                 return False
 
             # Since Python2 does not support isnumeric, check for cast exceptions
@@ -120,6 +120,7 @@ class TeleopActionClient:
         return True
 
     def send_movement_goal(self, actions):
+        movement_goal = Teleop.Goal()
         print("test send movement") #Added by Andy for testing
         """Accepts a list of actions to send to the action server.
         Feedback returned indicates the robot's current x, y, and heading."""
@@ -132,19 +133,16 @@ class TeleopActionClient:
             duration = float(instruction[1])
             print(str(duration)) #Added by Andy for testing
             #below two lines replace: goal = Teleop(direction, duration)
-            self.teleop_goal.operation = direction
-            self.teleop_goal.duration = duration
-            #Andy: Below lines commented out for testing purposes because they cause errors. They will be altered to work later
-            # self._client.send_goal(
-            #     self.teleop_goal,
-            #     done_cb=self.done_callback,
-            #     feedback_cb=self.feedback_callback,
-            # )
+            movement_goal.operation = direction
+            movement_goal.duration = duration
+            self._client.send_goal(
+                movement_goal,
+                feedback_callback=self.feedback_callback
+            )
 
 
             #rospy.loginfo --> self.teleop_node.get_logger().info(
-            #Andy: line below commented out for testing purposes because it causes an error. It will be altered to work later
-            #self.teleop_node.get_logger().info("%s has been sent.", direction)
+            self.teleop_node.get_logger().info("{0} has been sent.".format(direction))
 
             # Wait an additional 2 seconds to account for any potential lag
             
@@ -160,8 +158,7 @@ class TeleopActionClient:
             #...And just run a sleep function for two seconds to make up for the lag:
             time.sleep(2)
             #rospy.loginfo --> self.teleop_node.get_logger().info(
-            #Andy: line below commented out for testing purposes because it causes an error. It will be altered to work later
-            #self.teleop_node.get_logger().info(self._client._get_result())
+            self.teleop_node.get_logger().info(format(self._client._get_result()))
 
     def done_callback(self, status, result):
         print("test done callback") #Added by Andy for testing

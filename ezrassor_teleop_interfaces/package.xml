@@ -12,6 +12,8 @@
   <build_depend>rosidl_default_generators</build_depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
   <depend>action_msgs</depend>
+  <depend>geometry_msgs</depend> <!-- TODO: Check if necessary to have this -->
+  <depend>std_msgs</depend> <!-- TODO: Check if necessary to have this -->
   <member_of_group>rosidl_interface_packages</member_of_group>
   
   <!-- End of Added Dependencies for interfaces -->

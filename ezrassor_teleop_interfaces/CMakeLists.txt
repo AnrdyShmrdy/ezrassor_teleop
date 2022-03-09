@@ -24,11 +24,20 @@ find_package(ament_cmake REQUIRED)
 #Beginning of Added lines for building interfaces
 
 find_package(rosidl_default_generators REQUIRED)
-
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 #Note: first letter of action, msg, and srv files should be uppercase or build error will occur
+set(msg_files
+  "msg/LinkStates.msg"
+)
+set(action_files
+  "action/Teleop.action"
+)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "action/Teleop.action"
+  ${msg_files}
+  ${action_files}
+  DEPENDENCIES geometry_msgs std_msgs
 )
 
 #End of Added lines for building interfaces
