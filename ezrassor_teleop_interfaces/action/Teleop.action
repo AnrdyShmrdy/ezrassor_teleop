@@ -1,0 +1,25 @@
+# TeleopGoal
+string MOVE_FORWARD_OPERATION=move-forward
+string MOVE_BACKWARD_OPERATION=move-backward
+string ROTATE_LEFT_OPERATION=rotate-left
+string ROTATE_RIGHT_OPERATION=rotate-right
+string RAISE_FRONT_ARM_OPERATION=raise-front-arm
+string LOWER_FRONT_ARM_OPERATION=lower-front-arm
+string RAISE_BACK_ARM_OPERATION=raise-back-arm
+string LOWER_BACK_ARM_OPERATION=lower-back-arm
+string DUMP_FRONT_DRUM_OPERATION=dump-front-drum
+string DIG_FRONT_DRUM_OPERATION=dig-front-drum
+string DUMP_BACK_DRUM_OPERATION=dump-back-drum
+string DIG_BACK_DRUM_OPERATION=dig-back-drum
+string STOP_OPERATION=stop
+string operation
+float64 duration
+---
+# TeleopResult
+float64 x
+float64 y
+---
+# TeleopFeedback
+string heading
+float64 x
+float64 y
