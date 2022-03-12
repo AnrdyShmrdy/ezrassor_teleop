@@ -6,6 +6,10 @@
   <description>TODO: Package description</description>
   <maintainer email="andy.ponce@outlook.com">andyp</maintainer>
   <license>TODO: License declaration</license>
+  <!-- Beginning of Added Dependencies: -->
+  <depend>rclpy</depend>
+  <depend>ezrassor_teleop_interfaces</depend>
+  <!-- End of Added Dependencies: -->
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
