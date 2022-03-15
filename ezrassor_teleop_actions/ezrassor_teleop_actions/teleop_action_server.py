@@ -191,6 +191,48 @@ class TeleopActionServer(Node):
       self.back_arm_instructions.publish(float_zero)
       self.front_drum_instructions.publish(float_zero)
       self.back_drum_instructions.publish(float_zero)
+  def execution_timer_callback(self):
+    """If this callback is called, it is to stop execution"""
+    self.executing_goal = False
+  def send_feedback(self, goal_handle):
+        #Get operation to be executed
+    operation = goal_handle.request.operation
+    #Get length of time operation will be executed for
+    duration = goal_handle.request.duration
+
+    t0 = time.time()
+
+    # Feedback
+    while (time.time() - t0) < duration and self.executing_goal:
+
+      elapsed = time.time() - t0
+      self.get_logger().info(
+          #TODO: Change this to use .format for strings
+          "operation: " + str(operation) + ", " + 
+          "duration: " + str(duration) + ", " +
+          "elapsed: " + str(elapsed)
+      )
+
+      if goal_handle.is_cancel_requested:
+          self.get_logger().info("Preempted")
+          self.executing_goal = False
+          goal_handle.canceled #(result)
+          return
+
+      feedback = Teleop.Feedback()
+      feedback.x = 0.0
+      feedback.y = 0.0
+      feedback.heading = str("{} degrees".format(self.heading))
+      try:
+          goal_handle.publish_feedback(feedback)
+      except:
+          goal_handle.abort()
+          # set_aborted(
+          #     None, text="Unable to publish feedback. Has ROS stopped?"
+          # )
+          return
+
+
   def on_goal(self, goal_handle):
     """Define all of the scenarios for handling a new goal from an action client."""
     #Result Lines commented out for testing purposes
@@ -215,7 +257,10 @@ class TeleopActionServer(Node):
     self.get_logger().info("Goal Duration: " + str(duration))
     #Determine what to publish to topics based on operation type:
     self.on_operation(operation)
-    time.sleep(1) #wait added to test published output
+
+    self.send_feedback(goal_handle)
+
+    #time.sleep(duration) #wait added to test published output
     # Interim feedback
     feedback_msg = Teleop.Feedback()
     self.get_logger().info("feedback_msg: " + str(feedback_msg))
