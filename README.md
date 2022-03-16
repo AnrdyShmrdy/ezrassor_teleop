@@ -24,3 +24,24 @@ To verify whether the ezrassor_teleop_interfaces package was built, run this com
 To rebuild the interfaces package after modifying it, make sure to run this command in order to do so:  
 
 `colcon build --packages-select ezrassor_teleop_interfaces --cmake-clean-cache`  
+
+## How to run/use it:
+
+You'll need three terminals open, all of them sourced with your ROS2 Foxy installation and overlay  
+In each terminal, navigate to ezrassor_teleop_actions/ezrassor_teleop_actions from the root of the repository folder
+
+In the first terminal, run the teleop action server with the below command: 
+
+`python3 teleop_action_server.py`  
+
+In the second terminal run this command to display the messages published to the teleop_action_server/wheel_instructions_topic:
+
+`ros2 topic echo /teleop_action_server/wheel_instructions_topic`  
+
+In the third terminal, you can run `python3 send_single_goal.py` to see a wheel-action goal get sent to the teleop action server.  
+You can also run `python3 send_single_goal_cancel.py` to see a wheel-action goal get cancelled mid-execution
+
+## Current Progress:
+
+Currently the teleop action server can recieve one goal at a time from the teleop action client  
+The ability to send, execute, and cancel multiple goals is not yet complete
