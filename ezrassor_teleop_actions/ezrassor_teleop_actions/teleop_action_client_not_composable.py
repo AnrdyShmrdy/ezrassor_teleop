@@ -25,9 +25,8 @@ from rclpy.action import ActionClient
 
 def feedback_cb(logger, feedback):
     feedback_msg = feedback.feedback
-    logger.info('feedback heading: {0}'.format(feedback_msg.heading))
-    logger.info('feedback x: {0}'.format(feedback_msg.x))
-    logger.info('feedback y: {0}'.format(feedback_msg.y))
+    logger.info("feedback heading: {0} feedback x: {1} feedback y: {2}"
+    .format(feedback_msg.heading, feedback_msg.x, feedback_msg.y))
 
 def cancel_goal(goal_handle):
     """
@@ -38,7 +37,7 @@ def cancel_goal(goal_handle):
     You'll get the following Error:
     AttributeError: 'NoneType' object has no attribute 'cancel_goal_async'
     """
-    time.sleep(0.5)
+    time.sleep(2.5)
     goal_handle.cancel_goal_async()
 
     # if len(cancel_response.goals_canceling) > 0:
@@ -60,8 +59,8 @@ def main(args=None):
     action_client.wait_for_server()
 
     goal_msg = Teleop.Goal()
-    goal_msg.operation = "raise-front-arm"
-    goal_msg.duration = 1.0
+    goal_msg.operation = "move-forward"
+    goal_msg.duration = 3.0
     node.get_logger().info('Sending goal request...')
 
     send_goal_future = action_client.send_goal_async(
