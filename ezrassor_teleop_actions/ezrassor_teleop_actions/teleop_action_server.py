@@ -66,32 +66,32 @@ class TeleopActionServer(Node):
     #Create Publishers:
     self.wheel_instructions = self.create_publisher(
         Twist,
-        self.get_name() + "/wheel_instructions_topic",
+        "/wheel_instructions_topic",
         QUEUE_SIZE
     )
     self.front_arm_instructions = self.create_publisher(
         Float32,
-        self.get_name() + "/front_arm_instructions_topic",
+        "/front_arm_instructions_topic",
         QUEUE_SIZE
     )
     self.back_arm_instructions = self.create_publisher(
         Float32,
-        self.get_name() + "/back_arm_instructions_topic",
+        "/back_arm_instructions_topic",
         QUEUE_SIZE
     )
     self.front_drum_instructions = self.create_publisher(
         Float32,
-        self.get_name() + "/front_drum_instructions_topic",
+        "/front_drum_instructions_topic",
         QUEUE_SIZE
     )
     self.back_drum_instructions = self.create_publisher(
         Float32,
-        self.get_name() + "/back_drum_instructions_topic",
+        "/back_drum_instructions_topic",
         QUEUE_SIZE
     )
 
     # Make sure there are subscribers on the other end
-    time.sleep(5)
+    time.sleep(3)
     self.wheel_instructions.publish(ALL_STOP)
     self.front_arm_instructions.publish(float_zero)
     self.back_arm_instructions.publish(float_zero)
@@ -123,10 +123,12 @@ class TeleopActionServer(Node):
 
   def goal_callback(self, goal_request):
       """Accept or reject a client request to begin an action."""
+      #print("*******goal_callback*******") #for testing purposes
       self.get_logger().info('Received goal request')
       return GoalResponse.ACCEPT
 
   def handle_accepted_callback(self, goal_handle):
+      #print("*******handle_accepted_callback*******") #for testing purposes
       with self._goal_lock:
           # This server only allows one goal at a time
           if self._goal_handle is not None and self._goal_handle.is_active:
@@ -139,12 +141,13 @@ class TeleopActionServer(Node):
 
   def cancel_callback(self, goal):
       """Accept or reject a client request to cancel an action."""
+      #print("*******cancel_callback*******") #for testing purposes
       self.get_logger().info('Received cancel request')
       return CancelResponse.ACCEPT
 
   def on_operation(self,operation):
     """Define what to do in response to certain operations"""
-    
+    #print("*******on_operation*******") #for testing purposes
     msg = Twist()
     if operation == Teleop.Goal.MOVE_FORWARD_OPERATION:
       msg.linear.x = float(1)
@@ -195,6 +198,7 @@ class TeleopActionServer(Node):
       self.back_drum_instructions.publish(float_zero)
 
   def send_feedback(self, goal_handle):
+    #print("*******send_feedback*******") #for testing purposes
     #NOTE: WORK-IN-PROGRESS! Needs to properly implement various features, such as:
     #Goal Cancellation
     #Time Calculation
@@ -213,15 +217,24 @@ class TeleopActionServer(Node):
     while (time.time() - t0) < duration and self.executing_goal:
 
       elapsed = time.time() - t0
-      self.get_logger().info(
-          #TODO: Change this to use .format for strings
-          "operation: " + str(operation) + ", " + 
-          "duration: " + str(duration) + ", " +
-          "elapsed: " + str(elapsed)
-      )
+      """
+      I was unsure how to implement carriage return in get_logger().info()
+      As such I elected to use print() instead
+      """
+      print("operation: {}, duration: {} elapsed: {}"
+      .format(operation, duration, elapsed), end='\r')
+      # self.get_logger().info(
+      #     #TODO: Change this to use .format for strings
+      #     #TODO: Have this overwrite the previous line instead of printing a new line
+      #     "operation: " + str(operation) + ", " + 
+      #     "duration: " + str(duration) + ", " +
+      #     "elapsed: " + str(elapsed)
+      # )
 
       if goal_handle.is_cancel_requested:
-          self.get_logger().info("Preempted")
+          self._logger.info("operation: {}, duration: {} elapsed: {}"
+          .format(operation, duration, elapsed))
+          self.get_logger().info("Goal Cancelled")
           self.executing_goal = False
           goal_handle.canceled #(result)
           return
@@ -250,6 +263,8 @@ class TeleopActionServer(Node):
     #     #TODO: Maybe replace with goal_handle.abort(result)?
     #     #self._server.set_aborted(result)  # Returns failure
     #     return
+    self.executing_goal = True
+    #print("*******on_goal*******") #for testing purposes
     if not goal_handle.is_active:
       self.get_logger().info('Goal aborted')
       self.executing_goal = False
@@ -261,7 +276,7 @@ class TeleopActionServer(Node):
       self.executing_goal = False
       return Teleop.Result()
 
-    self.executing_goal = True
+    
 
     self.get_logger().info('Recieved goal, starting execution...')
     #Get operation to be executed
@@ -280,7 +295,7 @@ class TeleopActionServer(Node):
     #time.sleep(duration) #wait added to test published output
     # Interim feedback
     feedback_msg = Teleop.Feedback()
-    self.get_logger().info("feedback_msg: " + str(feedback_msg))
+    self.get_logger().info("feedback heading: " + str(feedback_msg.heading))
     self.get_logger().info("feedback x: " + str(feedback_msg.x))
     self.get_logger().info("feedback y: " + str(feedback_msg.y))
 
@@ -295,7 +310,7 @@ class TeleopActionServer(Node):
     # Indicate the goal was successful
     goal_handle.succeed()
     self.get_logger().info('Goal Handle Successful!')
-  
+    print('------------------------------------------------------------------------------')
     # Create a result message of the action type
     result = Teleop.Result()
     
