@@ -38,8 +38,10 @@ In the second terminal run this command to display the messages published to the
 
 `ros2 topic echo /teleop_action_server/wheel_instructions_topic`  
 
-In the third terminal, you can run `python3 send_single_goal.py` to see a wheel-action goal get sent to the teleop action server.  
-You can also run `python3 send_single_goal_cancel.py` to see a wheel-action goal get cancelled mid-execution
+In the third terminal, you can run one of three commands  
+You can run `python3 send_goal_no_cancel.py` to send a goal without cancelling it  
+You can run `python3 send_goal_timer_cancel.py` to send a goal that is cancelled halfway through execution  
+You can run `python3 send_goal_keyboard_cancel.py` to send a goal that can be cancelled by pressing the ESC key  
 
 ## Current Progress:
 
