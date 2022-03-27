@@ -306,7 +306,7 @@ class TeleopActionServer(Node):
     goal_handle.publish_feedback(feedback_msg)
   
     # Sleep function added in case needed. If not remove it
-    time.sleep(1)
+    #time.sleep(1)
     # Indicate the goal was successful
     goal_handle.succeed()
     self.get_logger().info('Goal Handle Successful!')
