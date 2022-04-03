@@ -92,11 +92,7 @@ class TeleopActionServer(Node):
 
     # Make sure there are subscribers on the other end
     time.sleep(3)
-    self.wheel_instructions.publish(ALL_STOP)
-    self.front_arm_instructions.publish(float_zero)
-    self.back_arm_instructions.publish(float_zero)
-    self.front_drum_instructions.publish(float_zero)
-    self.back_drum_instructions.publish(float_zero)
+    self.publish_stop()
 
     # Subscribe to the link states so we can get the xy position from Gazebo
     #TODO: Come back to this after figuring out way to circumnavigate gazebo dependency
@@ -144,7 +140,13 @@ class TeleopActionServer(Node):
       #print("*******cancel_callback*******") #for testing purposes
       self.get_logger().info('Received cancel request')
       return CancelResponse.ACCEPT
-
+  def publish_stop(self):
+    """Publish Zero to all topics to stop rover"""
+    self.wheel_instructions.publish(ALL_STOP)
+    self.front_arm_instructions.publish(float_zero)
+    self.back_arm_instructions.publish(float_zero)
+    self.front_drum_instructions.publish(float_zero)
+    self.back_drum_instructions.publish(float_zero)
   def on_operation(self,operation):
     """Define what to do in response to certain operations"""
     #print("*******on_operation*******") #for testing purposes
@@ -191,11 +193,7 @@ class TeleopActionServer(Node):
 
     else:
       # Otherwise, we must be stopping
-      self.wheel_instructions.publish(ALL_STOP)
-      self.front_arm_instructions.publish(float_zero)
-      self.back_arm_instructions.publish(float_zero)
-      self.front_drum_instructions.publish(float_zero)
-      self.back_drum_instructions.publish(float_zero)
+      self.publish_stop()
 
   def send_feedback(self, goal_handle):
     #print("*******send_feedback*******") #for testing purposes
@@ -237,6 +235,8 @@ class TeleopActionServer(Node):
           self.get_logger().info("Goal Cancelled")
           self.executing_goal = False
           goal_handle.canceled #(result)
+          self.get_logger().info("Publishing stop to all topics")
+          self.publish_stop()
           return
 
       feedback = Teleop.Feedback()
@@ -309,6 +309,9 @@ class TeleopActionServer(Node):
     #time.sleep(1)
     # Indicate the goal was successful
     goal_handle.succeed()
+    #Publish STOP to topics to indicate rover should be stopping
+    self.get_logger().info("Publishing stop to all topics")
+    self.make_stop() 
     self.get_logger().info('Goal Handle Successful!')
     print('------------------------------------------------------------------------------')
     # Create a result message of the action type
