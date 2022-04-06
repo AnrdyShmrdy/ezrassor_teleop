@@ -38,12 +38,16 @@ In the second terminal run this command to display the messages published to the
 
 `ros2 topic echo /teleop_action_server/wheel_instructions_topic`  
 
-In the third terminal, you can run one of three commands  
+In the third terminal, you can run several different files of your choosing:    
 You can run `python3 send_goal_no_cancel.py` to send a goal without cancelling it  
 You can run `python3 send_goal_timer_cancel.py` to send a goal that is cancelled halfway through execution  
 You can run `python3 send_goal_keyboard_cancel.py` to send a goal that can be cancelled by pressing the ESC key  
-
+You can run `python3 send_goal_list.py wheel-movements.txt` to send a list of wheel operation goals from a text file
 ## Current Progress:
 
-Currently the teleop action server can recieve one goal at a time from the teleop action client  
-The ability to send, execute, and cancel multiple goals is not yet complete
+The non-gazebo related features in the original ROS1 ezrassor-teleop have been migrated to ROS2  
+Detailed documentation regarding the package's functionality and testing is underway  
+
+## Future plans:
+
+See the list of issues for this repository to see what is looking to be added, improved upon, or fixed in the package
