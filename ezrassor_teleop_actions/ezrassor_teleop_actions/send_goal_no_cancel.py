@@ -13,6 +13,6 @@ action_client = TeleopActionClient()
 # Send an example goal (example is default values of parameters) 
 # Default values of send_goal: 
 # cancel_method="", operation="move-forward", duration=2.5, secondsToCancel=1.25
-action_client.send_goal(duration=0.3)
+action_client.send_goal()
 # Spin to execute callbacks
 rclpy.spin(action_client)

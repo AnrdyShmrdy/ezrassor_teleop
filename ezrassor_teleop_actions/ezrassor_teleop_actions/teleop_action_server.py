@@ -9,6 +9,9 @@ the server can fully function without them.
 Then they will be added back, and the server can be configured to 
 use them if desired.  
 """
+#Import for goal queue implementation
+import collections
+
 #import python threading library
 import threading
 
@@ -48,6 +51,13 @@ class TeleopActionServer(Node):
   
     # Initialize the class using the constructor
     super().__init__('teleop_action_server')
+    #Bottom three lines for goal queue management
+    self._goal_queue = collections.deque()
+    self._goal_queue_lock = threading.Lock()
+    self._current_goal = None
+    #Added to determine if goal is in mid-execution
+    self._executing_goal = False
+    #TODO: Check if below three lines are actually necessary...
     self._goal_handle = None
     self._goal_lock = threading.Lock()
     self.teleop_goal = Teleop.Goal()
@@ -124,16 +134,17 @@ class TeleopActionServer(Node):
       return GoalResponse.ACCEPT
 
   def handle_accepted_callback(self, goal_handle):
-      #print("*******handle_accepted_callback*******") #for testing purposes
-      with self._goal_lock:
-          # This server only allows one goal at a time
-          if self._goal_handle is not None and self._goal_handle.is_active:
-              self.get_logger().info('Aborting previous goal')
-              # Abort the existing goal
-              self._goal_handle.abort()
-          self._goal_handle = goal_handle
-
-      goal_handle.execute()
+    """Start or defer execution of an already accepted goal."""
+    with self._goal_queue_lock:
+        if self._current_goal is not None:
+            # Put incoming goal in the queue
+            self._goal_queue.append(goal_handle)
+            self.get_logger().info('Goal put in the queue')
+        else:
+            # Start goal execution right away
+            self._executing_goal = True
+            self._current_goal = goal_handle
+            self._current_goal.execute()
 
   def cancel_callback(self, goal):
       """Accept or reject a client request to cancel an action."""
@@ -194,134 +205,73 @@ class TeleopActionServer(Node):
     else:
       # Otherwise, we must be stopping
       self.publish_stop()
-
-  def send_feedback(self, goal_handle):
-    #print("*******send_feedback*******") #for testing purposes
-    #NOTE: WORK-IN-PROGRESS! Needs to properly implement various features, such as:
-    #Goal Cancellation
-    #Time Calculation
-    #Any other Action-Related methods
-    #TODO: Implement with the proper way to goal cancellation
-    #TODO: Implement with the proper way to calculate elapsed time 
-    #Get operation to be executed
-    operation = goal_handle.request.operation
-    #Get length of time operation will be executed for
-    duration = goal_handle.request.duration
-
-    t0 = time.time()
-
-    # Feedback
-    #NOTE: At some point in the future this could be changed to use ROS2 timer with callback
-    while (time.time() - t0) < duration and self.executing_goal:
-
-      elapsed = time.time() - t0
-      """
-      I was unsure how to implement carriage return in get_logger().info()
-      As such I elected to use print() instead
-      """
-      print("operation: {}, duration: {} elapsed: {}"
-      .format(operation, duration, elapsed), end='\r')
-      # self.get_logger().info(
-      #     #TODO: Change this to use .format for strings
-      #     #TODO: Have this overwrite the previous line instead of printing a new line
-      #     "operation: " + str(operation) + ", " + 
-      #     "duration: " + str(duration) + ", " +
-      #     "elapsed: " + str(elapsed)
-      # )
-
-      if goal_handle.is_cancel_requested:
-          self._logger.info("operation: {}, duration: {} elapsed: {}"
-          .format(operation, duration, elapsed))
-          self.get_logger().info("Goal Cancelled")
-          self.executing_goal = False
-          goal_handle.canceled #(result)
-          self.get_logger().info("Publishing stop to all topics")
-          self.publish_stop()
-          return
-
-      feedback = Teleop.Feedback()
-      feedback.x = 0.0
-      feedback.y = 0.0
-      feedback.heading = str("{} degrees".format(self.heading))
-      try:
-          goal_handle.publish_feedback(feedback)
-      except:
-          goal_handle.abort()
-          # set_aborted(
-          #     None, text="Unable to publish feedback. Has ROS stopped?"
-          # )
-          return
-
+  
   def on_goal(self, goal_handle):
     """Define all of the scenarios for handling a new goal from an action client."""
-    #Result Lines commented out for testing purposes
-    #TODO: Figure out how to migrate these lines to ROS2
-    # if not isinstance(goal_handle, Teleop):
-    #     #result = Teleop.Result()
-    #     self.get_logger().error("Unknown goal received")
-    #     #TODO: Figure out what the below line was attempting to do.
-    #     #TODO: Maybe replace with goal_handle.abort(result)?
-    #     #self._server.set_aborted(result)  # Returns failure
-    #     return
-    self.executing_goal = True
     #print("*******on_goal*******") #for testing purposes
-    if not goal_handle.is_active:
-      self.get_logger().info('Goal aborted')
-      self.executing_goal = False
-      return Teleop.Result()
-
-    if goal_handle.is_cancel_requested:
-      goal_handle.canceled()
-      self.get_logger().info('Goal canceled')
-      self.executing_goal = False
-      return Teleop.Result()
-
-    
-
-    self.get_logger().info('Recieved goal, starting execution...')
-    #Get operation to be executed
-    operation = goal_handle.request.operation
-    #Get length of time operation will be executed for
-    duration = goal_handle.request.duration
-    #Output name of operation
-    self.get_logger().info("Goal Operation: " + str(operation))
-    #Output duration of operation
-    self.get_logger().info("Goal Duration: " + str(duration))
-    #Determine what to publish to topics based on operation type:
-    self.on_operation(operation)
-
-    self.send_feedback(goal_handle)
-
-    #time.sleep(duration) #wait added to test published output
-    # Interim feedback
-    feedback_msg = Teleop.Feedback()
-    self.get_logger().info("feedback heading: " + str(feedback_msg.heading))
-    self.get_logger().info("feedback x: " + str(feedback_msg.x))
-    self.get_logger().info("feedback y: " + str(feedback_msg.y))
-
-    # Update feedback  
-    feedback_msg.heading = ''  
-    feedback_msg.x = 0.0
-    feedback_msg.y = 0.0
-    goal_handle.publish_feedback(feedback_msg)
-  
-    # Sleep function added in case needed. If not remove it
-    #time.sleep(1)
-    # Indicate the goal was successful
-    goal_handle.succeed()
-    #Publish STOP to topics to indicate rover should be stopping
-    self.get_logger().info("Publishing stop to all topics")
-    self.make_stop() 
-    self.get_logger().info('Goal Handle Successful!')
-    print('------------------------------------------------------------------------------')
-    # Create a result message of the action type
-    result = Teleop.Result()
-    
-    #Update result
-    result.x = feedback_msg.x
-    result.y = feedback_msg.y
-    
-    return result
+    try:
+      self.get_logger().info('Executing goal...')
+      feedback = Teleop.Feedback()
+      #Get operation to be executed
+      operation = goal_handle.request.operation
+      #Get length of time operation will be executed for
+      duration = goal_handle.request.duration
+      self.get_logger().info('Goal Operation: {}'.format(operation))
+      self.get_logger().info('Goal Duration: {}'.format(duration))
+      if self._executing_goal: #Sanity check to ensure messages are published correctly
+        self.on_operation(operation) #Publish message based on operation recieved
+      t0 = time.time()
+      while (time.time() - t0) < duration and self._executing_goal:
+        elapsed = time.time() - t0
+        
+        if goal_handle.is_cancel_requested:
+          goal_handle.canceled()
+          self._executing_goal = False
+          self.get_logger().info('Goal canceled...publishing stop to all topics')
+          self.publish_stop()
+          self._logger.info("operation: {}, duration: {}, time spent executing: {}"
+          .format(operation, duration, elapsed))
+          return Teleop.Result()
+        
+        #Publish Feedback:
+        print("operation: {}, duration: {} elapsed: {}"
+        .format(operation, duration, elapsed), end='\r')
+        feedback.x = 0.0
+        feedback.y = 0.0
+        feedback.heading = str("{} degrees".format(self.heading))
+        try:
+            goal_handle.publish_feedback(feedback)
+        except:
+            goal_handle.abort()
+            return
+          
+      #indicate goal was successful
+      goal_handle.succeed()
+      self._executing_goal = False
+      self.get_logger().info("Publishing stop to all topics")
+      self.publish_stop() 
+      self.get_logger().info('Goal Handle Successful!')
+      print('------------------------------------------------------------------------------')
+      # Create a result message of the action type
+      result = Teleop.Result()
+      
+      #Update result
+      result.x = feedback.x
+      result.y = feedback.y
+      
+      return result
+    finally:
+      with self._goal_queue_lock:
+          try:
+              # Start execution of the next goal in the queue.
+              self._current_goal = self._goal_queue.popleft()
+              self.get_logger().info('Next goal pulled from the queue')
+              self._executing_goal = True
+              self._current_goal.execute()
+          except IndexError:
+              # No goal in the queue.
+              self._current_goal = None
+              self._executing_goal = False
 
 
   #Gazebo Dependent Functions:

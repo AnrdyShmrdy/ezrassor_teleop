@@ -278,48 +278,10 @@ class TeleopActionClient(Node):
     Feedback returned indicates the robot's current x, y, and heading."""
     for action in actions:
         instruction = action.split(" ")
-        operation = instruction[0]
-        duration = float(instruction[1])
-        goal_msg = Teleop.Goal()
-        goal_msg.operation = operation
-        goal_msg.duration = duration
-        # Wait for the Action Server to launch
-        self._action_client.wait_for_server()
-        # Register a callback for when the future is complete
-        self._send_goal_future = self._action_client.send_goal_async(
-          goal_msg, 
-          feedback_callback=self.feedback_callback)    
-        self._send_goal_future.add_done_callback(self.goal_response_callback)
-
-        self.get_logger().info("{0} has been sent.".format(operation))
-        #Wait to to account for lag and prevent multiple goals from being sent simultaneously
-        time.sleep(0.1)
-
-  def send_goal_list_with_timer(self, actions): #NOTE: STILL A WORK IN PROGRESS!!!!!
-    ##NOTE: THIS DOES NOT YET FUNCTION CORRECTLY.
-    #TODO: Prevent this from sending a goal until previous one is either finished, aborted, rejected, or cancelled
-    """Accepts a list of actions to send to the action server.
-    Feedback returned indicates the robot's current x, y, and heading."""
-    for action in actions:
-        instruction = action.split(" ")
-        operation = instruction[0]
-        duration = float(instruction[1])
-        goal_msg = Teleop.Goal()
-        goal_msg.operation = operation
-        goal_msg.duration = duration
-        # Wait for the Action Server to launch
-        self._action_client.wait_for_server()
-        # Register a callback for when the future is complete
-        self._send_goal_future = self._action_client.send_goal_async(
-          goal_msg, 
-          feedback_callback=self.feedback_callback)    
-        self._send_goal_future.add_done_callback(self.goal_response_callback_with_timer)
-
-        self.get_logger().info("{0} has been sent.".format(operation))
-        #Wait to to account for lag and prevent multiple goals from being sent simultaneously
-        time.sleep(0.1)
-
-  #Miscellaneous fuctions:
+        self.send_goal("",instruction[0], float(instruction[1]))
+        #Need to sleep so that goals are sent in order recieved (queue)
+        #Without this, goals tend to be executed in reverse order (stack)
+        time.sleep(0.01)
 
   def read_instructions(self, instructions_file):
     """Parse in a text file to identify new goals.
