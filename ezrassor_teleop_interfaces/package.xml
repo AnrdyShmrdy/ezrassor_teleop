@@ -2,11 +2,11 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>ezrassor_teleop_interfaces</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <version>1.0.0</version>
+  <description>ROS2 Package containing interfaces for ezrassor_teleop_actions. Taken from ROS1 version of ezrassor_teleop_msgs and ezrassor_teleop_actions</description>
   <maintainer email="andy.ponce@outlook.com">andyp</maintainer>
-  <license>TODO: License declaration</license>
-  
+  <license>MIT</license>
+  <url type="website">https://github.com/FlaSpaceInst/EZ-RASSOR</url>
   <!-- Beginning of Added Dependencies for interfaces -->
   
   <build_depend>rosidl_default_generators</build_depend>
