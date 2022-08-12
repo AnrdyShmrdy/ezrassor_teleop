@@ -11,17 +11,25 @@ The direct links to the packages are below:
 
 ## How to compile it:
 
-If you are wanting to test this yourself, here are the commands to build the packages from your ros2 workspace directory root:  
+If you are wanting to test this yourself, clone this repository to the src folder in your ros2 workspace directory
 
-`colcon build --packages-select ezrassor_teleop_interfaces`  
+Then navigate back to the root of your ros2 workspace directory and run either 
 
-`colcon build --packages-select ezrassor_teleop_actions`  
+`colcon build --symlink-install`
 
-To verify whether the ezrassor_teleop_interfaces package was built, run this command:  
+or   
+
+`colcon build --packages-select ezrassor_teleop_interfaces ezrassor_teleop_actions --symlink-install`  
+
+Then after you have built the packages, run the command to source your ros2 environment:
+
+`source install/setup.bash`
+
+Before testing, verify whether the ezrassor_teleop_interfaces package was built, run this command:  
 
 `ros2 interface show ezrassor_teleop_interfaces/action/Teleop`  
 
-To rebuild the interfaces package after modifying it, make sure to run this command in order to do so:  
+Note that if you modifiy the interfaces package. you will need run this command in order to rebuild it:  
 
 `colcon build --packages-select ezrassor_teleop_interfaces --cmake-clean-cache`  
 
