@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#TODO: Remove this documentation comment below once rest of TODOs are resolved
 """
 NOTE:
 In the past the action server depended on messages published by Gazebo 
@@ -304,7 +305,8 @@ class TeleopActionServer(Node):
     #     self.heading = heading
     # else:
     #     self.heading = 360 + heading
-
+  
+  #TODO: Figure out way to remove gazebo dependency
   def quaternion_to_yaw(self, pose):
     """Helper function since Gazebo returns the forward kinematics of the robot
     as a quaternion"""
