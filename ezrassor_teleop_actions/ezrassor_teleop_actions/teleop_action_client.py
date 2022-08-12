@@ -10,22 +10,25 @@ from rclpy.action import ActionClient
 
 # Handles the creation of nodes
 from rclpy.node import Node
-from pynput import keyboard
+
 #variable for tracking keyListenerStatus
-_keyboardListenerActive = True
+#_keyboardListenerActive = True #TODO: Need to refactor use of this variable. See https://github.com/AnrdyShmrdy/ezrassor_teleop/issues/22
+
 #variable passed to createTimer in goal_response_callback_with_timer
 _secondsToCancel = 0.5
+
+#TODO: Need to refactor on_press. See https://github.com/AnrdyShmrdy/ezrassor_teleop/issues/22
 #function responsible for determining if a key is pressed
-def on_press(key):
-  global _keyboardListenerActive
-  #print('{0} pressed'.format(key))
-  if key == keyboard.Key.esc:
-    #keyboardListener should stop
-    _keyboardListenerActive = False
-    # Stop listener by returning false
-    return False
-_listener = keyboard.Listener(
-on_press=on_press)
+# def on_press(key):
+#   global _keyboardListenerActive
+#   #print('{0} pressed'.format(key))
+#   if key == keyboard.Key.esc:
+#     #keyboardListener should stop
+#     _keyboardListenerActive = False
+#     # Stop listener by returning false
+#     return False
+# _listener = keyboard.Listener(
+# on_press=on_press)
 
 """
 Terminology:
@@ -114,56 +117,58 @@ class TeleopActionClient(Node):
 
       # Start the timer to execute callback in _secondsToCancel seconds
       self._timer = self.create_timer(_secondsToCancel, self.timer_callback)
-
-  def goal_response_callback_with_keyboard(self, future):
-    """
-    This function is used to test goal cancellation with keyboard
-    """
-    #Helpful Debug Info:
-    #future is of type rclpy.task.Future
-    #future.result() is of type rclpy.action.client.ClientGoalHandle
+  
+  #TODO: Need to refactor goal_response_callback_with_keyboard. See https://github.com/AnrdyShmrdy/ezrassor_teleop/issues/22
+  # def goal_response_callback_with_keyboard(self, future):
+  #   """
+  #   This function is used to test goal cancellation with keyboard
+  #   """
+  #   #Helpful Debug Info:
+  #   #future is of type rclpy.task.Future
+  #   #future.result() is of type rclpy.action.client.ClientGoalHandle
     
-    goal_handle = future.result()
-    if not goal_handle.accepted:
-        self.get_logger().info('Goal rejected :(')
-        return
+  #   goal_handle = future.result()
+  #   if not goal_handle.accepted:
+  #       self.get_logger().info('Goal rejected :(')
+  #       return
 
-    self._goal_handle = goal_handle
+  #   self._goal_handle = goal_handle
 
-    self.get_logger().info('Goal accepted :)')
-    _listener.start()
-    self._timer = self.create_timer(timer_period_sec=0.05, 
-                                    callback=self.keyboard_callback)
-    self._get_result_future = goal_handle.get_result_async()
-    self._get_result_future.add_done_callback(self.get_result_callback)
+  #   self.get_logger().info('Goal accepted :)')
+  #   _listener.start()
+  #   self._timer = self.create_timer(timer_period_sec=0.05, 
+  #                                   callback=self.keyboard_callback)
+  #   self._get_result_future = goal_handle.get_result_async()
+  #   self._get_result_future.add_done_callback(self.get_result_callback)
 
-  def keyboard_callback(self):
-    """
-    Function callback for keyboard goal cancellation
-    This function checks if the keyboardListener should still be active
-    If it should be terminated, then it stops the listener
-    If not then it runs without doing anything
-    """
-    #Helpful Debug Info:
-    #future is of type rclpy.task.Future
-    #self._goal_handle is of type ClientGoalHandle
-    #NOTE:Any function containing this callback will have "with_keyboard" appended to the name
-    global _keyboardListenerActive
-    global _listener
-    #If key is pressed, then value of _keyboardListenerActive is False
-    if(_keyboardListenerActive == False):
-      #Set value back to True so that we can rerun the keyboard listener again later
-      _keyboardListenerActive = True
-      #Stop Keyboard Listener Thread
-      self.get_logger().info('Stopping Keyboard Listener...')
-      _listener.stop()
-      # Cancel the timer
-      self.get_logger().info('Cancelling timer...')
-      self._timer.cancel()
-      self.get_logger().info('Cancelling goal...')
-      # Below two lines create a goal cancellation request
-      future = self._goal_handle.cancel_goal_async()
-      future.add_done_callback(self.cancel_done)
+  ##TODO: Need to refactor keyboard_callback. See https://github.com/AnrdyShmrdy/ezrassor_teleop/issues/22
+  # def keyboard_callback(self):
+  #   """
+  #   Function callback for keyboard goal cancellation
+  #   This function checks if the keyboardListener should still be active
+  #   If it should be terminated, then it stops the listener
+  #   If not then it runs without doing anything
+  #   """
+  #   #Helpful Debug Info:
+  #   #future is of type rclpy.task.Future
+  #   #self._goal_handle is of type ClientGoalHandle
+  #   #NOTE:Any function containing this callback will have "with_keyboard" appended to the name
+  #   global _keyboardListenerActive
+  #   global _listener
+  #   #If key is pressed, then value of _keyboardListenerActive is False
+  #   if(_keyboardListenerActive == False):
+  #     #Set value back to True so that we can rerun the keyboard listener again later
+  #     _keyboardListenerActive = True
+  #     #Stop Keyboard Listener Thread
+  #     self.get_logger().info('Stopping Keyboard Listener...')
+  #     _listener.stop()
+  #     # Cancel the timer
+  #     self.get_logger().info('Cancelling timer...')
+  #     self._timer.cancel()
+  #     self.get_logger().info('Cancelling goal...')
+  #     # Below two lines create a goal cancellation request
+  #     future = self._goal_handle.cancel_goal_async()
+  #     future.add_done_callback(self.cancel_done)
 
   def feedback_callback(self, feedback_message):
     """
@@ -217,7 +222,7 @@ class TeleopActionClient(Node):
       self.get_logger().info('Cancelling timer...')
       self._timer.cancel()
     except: #Added in case error is raised upon cancelling a previously cancelled timer
-      self.get_logger().info('Skipped cancelling timer and/or keyboard listener')
+      self.get_logger().info('Skipped cancelling timer and/or keyboard listener') #TODO: Maybe reword this after dealing with https://github.com/AnrdyShmrdy/ezrassor_teleop/issues/22
     finally:
       result = future.result().result
       self.get_logger().info("result: " + str(result))
@@ -232,9 +237,11 @@ class TeleopActionClient(Node):
                 secondsToCancel=1.25):
     """
     Action client to send the goal
-    Methods for cancelling: keyboard and timer
+    Methods for cancelling: keyboard and timer 
     Default values represent an example/test goal to send
     """
+    #TODO: Maybe reword the above doc comment after dealing with https://github.com/AnrdyShmrdy/ezrassor_teleop/issues/22
+
     #Helpful Debug Info:
     #goal_msg is of type ezrassor_teleop_interfaces.action.Teleop_Goal
     #self._send_goal_future is of type rclpy.task.Future
@@ -258,12 +265,15 @@ class TeleopActionClient(Node):
     self._send_goal_future = self._action_client.send_goal_async(
       goal=goal_msg, 
       feedback_callback=self.feedback_callback)
-    #If method of cancelling a goal is keyboard:
-    if(cancel_method == "keyboard"):
-      #add a callback function to be executed when the Future is complete
-      self._send_goal_future.add_done_callback(self.goal_response_callback_with_keyboard)
+    
+    #TODO: Need to refactor this if-statement. See https://github.com/AnrdyShmrdy/ezrassor_teleop/issues/22
+    # #If method of cancelling a goal is keyboard:
+    # if(cancel_method == "keyboard"):
+    #   #add a callback function to be executed when the Future is complete
+    #   self._send_goal_future.add_done_callback(self.goal_response_callback_with_keyboard)
+    
     #If method of cancelling a goal is timer:
-    elif(cancel_method == "timer"):
+    if(cancel_method == "timer"):
       #add a callback function to be executed when the Future is complete
       self._send_goal_future.add_done_callback(self.goal_response_callback_with_timer)
     #If method of cancellation is not given:
@@ -303,7 +313,6 @@ class TeleopActionClient(Node):
     program will exit early."""
 
     if not type(action_list) is list:
-        #rospy.logerr -->  self.teleop_node.get_logger().error(
         self.get_logger().error(
             "Teleop Client script was not given an object of type list"
         )
@@ -343,11 +352,10 @@ class TeleopActionClient(Node):
         duration = action_components[1]
 
         if op not in valid_operations:
-            #rospy.logerr -->  self.teleop_node.get_logger().error(
             self.get_logger().error("Invalid operation received: {0}".format(action))
             return False
 
-        # Since Python2 does not support isnumeric, check for cast exceptions
+        #TODO: Python2 did not support isnumeric, so this was to check for cast exceptions. Refactor to use Python3 isnumeric
         try:
             float(duration)
         except ValueError:
