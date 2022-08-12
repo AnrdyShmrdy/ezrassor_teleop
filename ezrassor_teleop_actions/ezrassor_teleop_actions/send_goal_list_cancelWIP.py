@@ -1,5 +1,5 @@
 #!/usr/bin/env python3 
-from teleop_action_client import TeleopActionClient
+from ezrassor_teleop_actions.teleop_action_client import TeleopActionClient
 #library to use input arguments given to python file
 import sys
 # ROS Client Library for Python
