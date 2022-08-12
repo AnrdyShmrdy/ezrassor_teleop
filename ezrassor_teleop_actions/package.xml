@@ -2,10 +2,12 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>ezrassor_teleop_actions</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="andy.ponce@outlook.com">andyp</maintainer>
-  <license>TODO: License declaration</license>
+  <version>1.0.0</version>
+  <description>ROS2 version of ezrassor_teleop_actions</description>
+  <author email="andy.ponce@outlook.com">Andrew Ponce</author>
+  <maintainer email="andy.ponce@outlook.com">Andrew Ponce</maintainer>
+  <license>MIT</license>
+  <url type="website">https://github.com/FlaSpaceInst/EZ-RASSOR</url>
   <!-- Beginning of Added Dependencies: -->
   <depend>rclpy</depend>
   <depend>ezrassor_teleop_interfaces</depend>
