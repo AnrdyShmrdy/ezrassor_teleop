@@ -13,11 +13,11 @@ The direct links to the packages are below:
 
 If you are wanting to test this yourself, clone this repository to the src folder in your ros2 workspace directory
 
-Then navigate back to the root of your ros2 workspace directory and run either this command here, which will build all your packages:
+Then navigate back to the root of your ros2 workspace directory and run either
 
 `colcon build --symlink-install`
 
- Or run this command here, which will build only the packages in this repository:
+or
 
 `colcon build --packages-select ezrassor_teleop_interfaces ezrassor_teleop_actions --symlink-install`  
 
@@ -45,10 +45,12 @@ In the first terminal, run the teleop action server with the below command:
 
 In the second terminal you can choose to run several different programs that showcase how the teleop_action_client can send goals  and interact with the teleop_action_server
 
-To send a goal without cancelling it, run the send_goal_no_cancel program.  using the following command:  
+To send a goal without cancelling it, run the send_goal_no_cancel program using the following command:
+ 
 `ros2 run ezrassor_teleop_actions send_goal_no_cancel`
 
-To send a goal that will be cancelled halfway through execution, run the send_goal_timer_cancel program using the following command:  
+To send a goal that will be cancelled halfway through execution, run the send_goal_timer_cancel program using the following command:
+ 
 `ros2 run ezrassor_teleop_actions send_goal_timer_cancel`  
 
 (**Currently incomplete**) To send a goal that can be cancelled by pressing the ESC key, run the send_goal_keyboard_cancel using the following command:
