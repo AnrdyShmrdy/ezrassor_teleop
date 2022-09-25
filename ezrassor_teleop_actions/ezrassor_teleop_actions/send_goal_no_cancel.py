@@ -4,15 +4,22 @@ from ezrassor_teleop_actions.teleop_action_client import TeleopActionClient
 # ROS Client Library for Python
 import rclpy
 
-# Initialize the rclpy library
-rclpy.init()
+def main(args=None):
+    """
+    Entry point for the program.
+    """
+    # Initialize the rclpy library
+    rclpy.init()
 
-# Create the Action Client node
-action_client = TeleopActionClient()
+    # Create the Action Client node
+    action_client = TeleopActionClient()
 
-# Send an example goal (example is default values of parameters) 
-# Default values of send_goal: 
-# cancel_method="", operation="move-forward", duration=2.5, secondsToCancel=1.25
-action_client.send_goal()
-# Spin to execute callbacks
-rclpy.spin(action_client)
+    # Send an example goal (example is default values of parameters) 
+    # Default values of send_goal: 
+    # cancel_method="", operation="move-forward", duration=2.5, secondsToCancel=1.25
+    action_client.send_goal()
+    # Spin to execute callbacks
+    rclpy.spin(action_client)
+
+if __name__ == '__main__':
+    main()

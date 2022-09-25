@@ -20,10 +20,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-                    'send_goal_keyboard_cancel = ezrassor_teleop_actions.send_goal_keyboard_cancel',
-                    'send_goal_list = ezrassor_teleop_actions.send_goal_list',
-                    'send_goal_no_cancel = ezrassor_teleop_actions.send_goal_no_cancel',
-                    'send_goal_timer_cancel = ezrassor_teleop_actions.send_goal_timer_cancel',
+                    'send_goal_keyboard_cancel = ezrassor_teleop_actions.send_goal_keyboard_cancel:main',
+                    'send_goal_list = ezrassor_teleop_actions.send_goal_list:main',
+                    'send_goal_no_cancel = ezrassor_teleop_actions.send_goal_no_cancel:main',
+                    'send_goal_timer_cancel = ezrassor_teleop_actions.send_goal_timer_cancel:main',
                     'teleop_action_server = ezrassor_teleop_actions.teleop_action_server:main'
         ],
     },
